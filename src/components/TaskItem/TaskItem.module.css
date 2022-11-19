@@ -1,0 +1,16 @@
+.container {
+  width: 100%;
+  background-color: #fff5a0;
+  border: 2px solid #3f3f3f;
+  border-radius: 10px;
+  padding: 1rem 1rem 2rem;
+  margin: 2rem 0;
+}
+.container form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
+}
