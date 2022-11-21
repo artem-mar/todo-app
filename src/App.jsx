@@ -2,14 +2,16 @@ import React, {
   useEffect, useMemo, useState,
 } from 'react';
 import axios from 'axios';
-import TaskForm from './components/TaskForm/TaskForm.jsx';
+import { PlusLg } from 'react-bootstrap-icons';
+import FormBlock from './components/TaskForm/FormBlock.jsx';
 import TaskContext from './TaskContext.js';
-import TaskList from './components/TaskList/TaskList.jsx';
+import TaskList from './components/TaskList.jsx';
 
 import styles from './App.module.css';
 
 const App = () => {
-  const [tasks, setTasks] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [printForm, setPrintForm] = useState(false);
 
   useEffect(() => {
     const uploadTasks = async () => {
@@ -28,10 +30,16 @@ const App = () => {
   }, []);
 
   return (
-    <TaskContext.Provider value={useMemo(() => ({ tasks, setTasks }), [tasks, setTasks])}>
-      <main className={styles.container}>
-        <div className={styles.inner}>
-          <TaskForm />
+    <TaskContext.Provider value={
+      useMemo(() => ({ tasks, setTasks, setPrintForm }), [tasks, setTasks])
+    }
+    >
+      <main className={styles.app_container}>
+        <div className={styles.app_container_item}>
+          <button onClick={() => setPrintForm(true)} className={styles.plus_btn} type="button">
+            <PlusLg size="100%" />
+          </button>
+          {printForm && <FormBlock />}
           <TaskList tasks={tasks} />
         </div>
       </main>

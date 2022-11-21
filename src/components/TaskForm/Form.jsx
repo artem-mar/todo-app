@@ -1,36 +1,37 @@
 /* eslint-disable no-param-reassign */
 import React, {
-  useState, useRef, useEffect, useContext,
+  useRef, useState, useEffect, useContext,
 } from 'react';
 import { useImmer } from 'use-immer';
-import { FileEarmarkPlus, FileEarmarkPlusFill } from 'react-bootstrap-icons';
+import { FileEarmarkPlusFill, FileEarmarkPlus } from 'react-bootstrap-icons';
 import axios from 'axios';
-import TaskContext from '../../TaskContext.js';
+import TaskContext from '../../TaskContext';
 
-import styles from './TaskForm.module.css';
+import styles from './Form.module.css';
 
-const TaskForm = () => {
+const Form = ({
+  initialValue = {
+    name: '',
+    description: '',
+    filePath: '',
+    deadline: '',
+    status: 'pending', // completed expired
+  }, closeForm,
+}) => {
   const nameField = useRef(null);
   const form = useRef(null);
 
   useEffect(() => {
-    nameField.current.focus();
+    nameField.current.select();
   }, []);
 
-  const initialValue = {
-    name: '',
-    description: '',
-    file: '',
-    deadline: '',
-    completed: false,
-  };
-  const [task, updateTask] = useImmer(initialValue);
+  const [formData, updateFormData] = useImmer(initialValue);
   const [error, setError] = useState(null);
 
   const { tasks, setTasks } = useContext(TaskContext);
 
   const onChange = ({ target: { name, value } }) => {
-    updateTask((draft) => {
+    updateFormData((draft) => {
       draft[name] = value;
     });
   };
@@ -40,13 +41,20 @@ const TaskForm = () => {
 
     try {
       const url = 'https://todo-list-7aa15-default-rtdb.europe-west1.firebasedatabase.app/todos.json';
-      const { data } = await axios.post(`dd${url}`, task);
-      const id = data.name;
-      const taskWithId = { ...task, id };
-      setTasks([...tasks, taskWithId]);
 
-      updateTask(initialValue);
-      setError(null);
+      if (Object.hasOwn(formData, 'id')) {
+        const { id, ...taskWithoutId } = formData;
+        await axios.patch(url, { [id]: taskWithoutId });
+        const filtered = tasks.map((t) => (t.id === id ? { id, ...formData } : t));
+        setTasks(filtered);
+      } else {
+        const { data } = await axios.post(url, formData);
+        const id = data.name;
+        const taskWithId = { ...formData, id };
+        setTasks([...tasks, taskWithId]);
+      }
+
+      closeForm();
     } catch (e) {
       const feedback = e.name === 'AxiosError' ? 'Ошибка сети' : 'Неизвестная ошибка';
       setError(feedback);
@@ -54,14 +62,14 @@ const TaskForm = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <form ref={form} onSubmit={submitData} id="task">
+    <>
+      <form style={{ width: '100%' }} ref={form} onSubmit={submitData} id="task">
         <div className={styles.flex_row}>
-          <label className={styles.flex_item} htmlFor="name">
-            <span>Название</span>
+          <label className={styles.flex_item_grow1} htmlFor="name">
+            <h3>Название</h3>
             <input
               onChange={onChange}
-              value={task.name}
+              value={formData.name}
               ref={nameField}
               className={styles.input_field}
               required
@@ -74,23 +82,23 @@ const TaskForm = () => {
           </label>
 
           <label className={styles.flex_item} htmlFor="deadline">
-            <span>Дедлайн</span>
+            <h3>Дедлайн</h3>
             <input
               onChange={onChange}
-              value={task.deadline}
+              value={formData.deadline}
               required
               className={styles.input_field}
-              type="date"
+              type="datetime-local"
               id="deadline"
               name="deadline"
             />
           </label>
 
           <label className={styles.file_label} htmlFor="file">
-            {task.file ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
+            {formData.filePath ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
             <input
               onChange={onChange}
-              value={task.file}
+              value={formData.filePath}
               className={styles.file_input}
               autoComplete="off"
               type="file"
@@ -104,20 +112,23 @@ const TaskForm = () => {
         <div className={styles.flex_row}>
           <textarea
             onChange={onChange}
-            value={task.description}
+            value={formData.description}
             className={styles.input_field}
             form="task"
             autoComplete="off"
             placeholder="Введите описание"
             name="description"
-            rows="3"
+            rows="2"
           />
-          <button className={styles.submit_button} type="submit">Отправить</button>
+          <div className={styles.flex_col}>
+            <button onClick={closeForm} className={styles.btn_cancel} type="button">Отмена</button>
+            <button className={styles.btn_submit} type="submit">Отправить</button>
+          </div>
         </div>
       </form>
       {error && <span className={styles.feedback}>{error}</span>}
-    </div>
+    </>
   );
 };
 
-export default TaskForm;
+export default Form;
