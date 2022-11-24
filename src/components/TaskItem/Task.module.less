@@ -4,7 +4,7 @@
 .flex_row_start {
   .flex_row();
 
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .task_info {
@@ -12,7 +12,7 @@
   .flex_col();
 
   text-align: start;
-  margin-left: 1rem;
+  margin-left: 0rem;
   word-wrap: break-word;
 
   .file {
@@ -31,34 +31,56 @@
 }
 
 .task_control {
-  .flex_item();
   .flex_col();
 
-  justify-content: space-between;
-  align-content: center;
+  font-size: 0.9rem;
+  text-align: end;
+  color:#3f3f3f;
+  flex: 0 1 0;
+  min-width: 6rem;
 }
 
 .btn_group {
   display: flex;
-  justify-content: center;
+  justify-content: end;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.5rem;
   color: #f3f3f3;
+  margin-top: auto
 }
 
 .btn {
   cursor: pointer;
 
-  height: 2rem;
   border: none;
-  text-align: center;
-  background-color: #00000000;
+  background: none;
+  color: #3f3f3f;
 
   &:active {
-    opacity: 0.8;
     box-shadow: none;
     transform: translate(1px, 1px);
   }
+
+  &:hover {
+    opacity: 0.8;
+  }
 }
 
+.IN_WORK {
+  .btn();
+
+  color: #3f3f3f;
+}
+
+.COMPLETED {
+  .btn();
+
+  color: @green;
+}
+
+.EXPIRED {
+  .btn();
+
+  color: @red;
+}
 
