@@ -1,58 +1,121 @@
-import React, { useContext } from 'react';
+import React, {
+  useContext, useEffect, useRef, useState,
+} from 'react';
 import {
-  PencilSquare, CheckCircleFill, XCircleFill, Trash3,
+  PencilSquare, CheckCircleFill, XCircleFill, Trash3, Circle,
 } from 'react-bootstrap-icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/ru';
+import axios from 'axios';
 import TaskContext from '../../TaskContext';
+import paths from '../../path.js';
 
 import styles from './Task.module.css';
 
 dayjs.extend(localizedFormat);
 dayjs.locale('ru');
 
+const statusIcons = {
+  COMPLETED: CheckCircleFill,
+  IN_WORK: Circle,
+  EXPIRED: XCircleFill,
+};
+
 const Task = ({ task, openForm }) => {
-  const date = dayjs(task.deadline).format('LLL');
+  const date = dayjs(task.deadline).format('D MMMM YYYY, HH:mm');
 
   const { tasks, setTasks } = useContext(TaskContext);
+  const [submitting, setSubmitting] = useState(false);
+
+  const changeStatus = async (newStatus) => {
+    const url = paths.dataBase();
+    try {
+      setSubmitting(true);
+      const { id, ...taskWithoutId } = task;
+      const updatedTask = { ...taskWithoutId, status: newStatus };
+      await axios.patch(url, { [id]: updatedTask });
+
+      const filtered = tasks.map((t) => (
+        t.id === task.id ? { ...task, status: newStatus } : t
+      ));
+      setTasks(filtered);
+    } catch (err) {
+      console.log(err.message);
+    }
+    setSubmitting(false);
+  };
+
+  const isExpired = (d) => dayjs().isAfter(dayjs(d));
+
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    const watchTime = () => {
+      if (isExpired(task.deadline) && task.status === 'IN_WORK') {
+        changeStatus('EXPIRED');
+      }
+
+      if (task.status === 'IN_WORK' && !isExpired(task.deadline)) {
+        timerRef.current = setTimeout(watchTime, 30000);
+      }
+    };
+    watchTime();
+
+    return () => clearTimeout(timerRef.current);
+  }, [task]);
 
   const toggleStatus = () => {
-    const newStatus = task.status === 'pending' ? 'success' : 'pending';
-    const filtered = tasks.map((t) => (t.id === task.id ? { ...task, status: newStatus } : t));
-    setTasks(filtered);
+    const newStatus = task.status === 'IN_WORK' ? 'COMPLETED' : 'IN_WORK';
+    changeStatus(newStatus);
   };
+
+  const deleteTask = async () => {
+    const url = paths.dataBase(task.id);
+    try {
+      await axios.delete(url);
+      const filtered = tasks.filter((t) => t.id !== task.id);
+      setTasks(filtered);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  const Icon = statusIcons[task.status];
 
   return (
     <div className={styles.flex_row_start}>
+      <div className={styles.flex_col}>
+        <button
+          disabled={submitting}
+          onClick={toggleStatus}
+          className={styles[task.status]}
+          type="button"
+        >
+          <Icon size="1.5rem" />
+        </button>
+      </div>
+
       <div className={styles.task_info}>
-
-        <h2>{task.name}</h2>
+        <h2>
+          {task.name}
+        </h2>
         <p className={styles.description}>{task.description}</p>
-        <span className={styles.file}>{task.file}</span>
-
+        {task.file && <span className={styles.file}>{task.file}</span>}
       </div>
 
       <div className={styles.task_control}>
         <span>{date}</span>
         <div className={styles.btn_group}>
-          <button onClick={toggleStatus} className={styles.btn} type="button">
-            {task.status === 'pending' && <CheckCircleFill size="2rem" />}
-            {task.status === 'success' && <CheckCircleFill color="green" size="2rem" />}
-            {task.status === 'expired' && <XCircleFill color="red" size="2rem" />}
-          </button>
-
           <button className={styles.btn} type="button" onClick={openForm}>
-            <PencilSquare size="2rem" />
+            <PencilSquare size="1.5rem" />
           </button>
 
           <button className={styles.btn} type="button">
-            <Trash3 size="2rem" />
+            <Trash3 onClick={deleteTask} size="1.5rem" />
           </button>
         </div>
-
       </div>
-
     </div>
   );
 };
