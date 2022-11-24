@@ -6,6 +6,7 @@ import { useImmer } from 'use-immer';
 import { FileEarmarkPlusFill, FileEarmarkPlus } from 'react-bootstrap-icons';
 import axios from 'axios';
 import TaskContext from '../../TaskContext';
+import paths from '../../path.js';
 
 import styles from './Form.module.css';
 
@@ -15,7 +16,7 @@ const Form = ({
     description: '',
     filePath: '',
     deadline: '',
-    status: 'pending', // completed expired
+    status: 'IN_WORK', // COMPLETED EXPIRED
   }, closeForm,
 }) => {
   const nameField = useRef(null);
@@ -27,8 +28,10 @@ const Form = ({
 
   const [formData, updateFormData] = useImmer(initialValue);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const { tasks, setTasks } = useContext(TaskContext);
+  const fileInput = useRef(null); // //////////////////////////////
 
   const onChange = ({ target: { name, value } }) => {
     updateFormData((draft) => {
@@ -38,14 +41,14 @@ const Form = ({
 
   const submitData = async (event) => {
     event.preventDefault();
+    const url = paths.dataBase();
 
     try {
-      const url = 'https://todo-list-7aa15-default-rtdb.europe-west1.firebasedatabase.app/todos.json';
-
+      setSubmitting(true);
       if (Object.hasOwn(formData, 'id')) {
         const { id, ...taskWithoutId } = formData;
         await axios.patch(url, { [id]: taskWithoutId });
-        const filtered = tasks.map((t) => (t.id === id ? { id, ...formData } : t));
+        const filtered = tasks.map((t) => (t.id === id ? formData : t));
         setTasks(filtered);
       } else {
         const { data } = await axios.post(url, formData);
@@ -58,12 +61,14 @@ const Form = ({
     } catch (e) {
       const feedback = e.name === 'AxiosError' ? 'Ошибка сети' : 'Неизвестная ошибка';
       setError(feedback);
+      setSubmitting(false);
+      console.log(e);
     }
   };
 
   return (
     <>
-      <form style={{ width: '100%' }} ref={form} onSubmit={submitData} id="task">
+      <form ref={form} onSubmit={submitData} id="task">
         <div className={styles.flex_row}>
           <label className={styles.flex_item_grow1} htmlFor="name">
             <h3>Название</h3>
@@ -95,16 +100,15 @@ const Form = ({
           </label>
 
           <label className={styles.file_label} htmlFor="file">
-            {formData.filePath ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
+            {formData.file ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
             <input
+              ref={fileInput}
               onChange={onChange}
               value={formData.filePath}
               className={styles.file_input}
-              autoComplete="off"
               type="file"
               id="file"
               name="file"
-              multiple
             />
           </label>
         </div>
@@ -122,7 +126,7 @@ const Form = ({
           />
           <div className={styles.flex_col}>
             <button onClick={closeForm} className={styles.btn_cancel} type="button">Отмена</button>
-            <button className={styles.btn_submit} type="submit">Отправить</button>
+            <button disabled={submitting} className={styles.btn_submit} type="submit">Отправить</button>
           </div>
         </div>
       </form>
