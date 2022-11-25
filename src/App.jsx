@@ -19,8 +19,10 @@ const App = () => {
 
       try {
         const { data } = await axios.get(url);
-        const taskList = Object.entries(data).map(([id, task]) => ({ id, ...task }));
-        setTasks(taskList);
+        if (data) {
+          const taskList = Object.entries(data).map(([id, task]) => ({ id, ...task }));
+          setTasks(taskList);
+        }
       } catch (e) {
         const feedback = e.name === 'AxiosError' ? 'Ошибка сети' : 'Неизвестная ошибка';
         console.log(feedback);
