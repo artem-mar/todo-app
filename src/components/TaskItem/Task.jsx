@@ -84,8 +84,10 @@ const Task = ({ task, openForm }) => {
     try {
       await axios.delete(url);
       const filtered = tasks.filter((t) => t.id !== task.id);
-      storageApi.deleteFile(task.fileName);
       setTasks(filtered);
+      if (task.fileName) {
+        storageApi.deleteFile(task.fileName);
+      }
     } catch (err) {
       console.log(err);
     }
