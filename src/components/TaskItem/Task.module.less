@@ -1,7 +1,7 @@
 //compress: true
 @import '../../App.module.less';
 
-.flex_row_start {
+.flex_row_stretch {
   .flex_row();
 
   align-items: stretch;
@@ -11,6 +11,7 @@
   .flex_item_grow1();
   .flex_col();
 
+  gap: 0.5rem;
   text-align: start;
   margin-left: 0rem;
   word-wrap: break-word;
@@ -28,14 +29,25 @@
     font-size: 1em;
     font-style: italic;
   }
+
+  a {
+    width: fit-content;
+    text-decoration: none;
+    color: @grey;
+
+    &:hover {
+      text-decoration-line: underline;
+    }
+  }
 }
 
 .task_control {
   .flex_col();
 
+  gap: 0.5rem;
   font-size: 0.9rem;
   text-align: end;
-  color:#3f3f3f;
+  color: @grey;
   flex: 0 1 0;
   min-width: 6rem;
 }

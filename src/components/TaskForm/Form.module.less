@@ -8,7 +8,8 @@
   width: 100%;
   padding: 0.5rem;
   resize: none;
-  line-height: 1.5rem;
+  line-height: 1.2rem;
+  border-radius: 10px;
 
   &:focus {
     border: 1px solid #38383890;
@@ -28,7 +29,7 @@ input {
 
 .file_label {
   cursor: pointer;
-  color: #3f3f3f;
+  color: @grey;
   padding: 0;
   flex: 0 1 0;
 
@@ -41,6 +42,18 @@ input {
   }
 }
 
+.flex_row_stretch {
+  .flex_row();
+
+  align-items: stretch;
+}
+
+.btn_group {
+  .flex_col();
+  margin-top: 0.5rem;
+  gap: 0.4rem;
+}
+
 .btn {
   border: none;
   cursor: pointer;
@@ -51,7 +64,8 @@ input {
   font-weight: 400;
   color: #fff;
   padding: 0.3rem 0.5rem;
-  box-shadow: 1px 1px 1px #8b8b8b;
+  border-radius: 2rem;
+  height: 100%;
 
   &:active {
     box-shadow: none;
@@ -63,7 +77,7 @@ input {
   }
 
   &:disabled {
-    background-color: grey;
+    background-color: #00554c;
     box-shadow: none;
     transform: translate(1px, 1px);
   }

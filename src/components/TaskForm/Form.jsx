@@ -125,7 +125,7 @@ const Form = ({
           </label>
         </div>
 
-        <div className={styles.flex_row}>
+        <div className={styles.flex_row_stretch}>
           <textarea
             onChange={onChange}
             value={formData.description}
@@ -134,9 +134,9 @@ const Form = ({
             autoComplete="off"
             placeholder="Введите описание"
             name="description"
-            rows="2"
+            rows="3"
           />
-          <div className={styles.flex_col}>
+          <div className={styles.btn_group}>
             <button onClick={closeForm} className={styles.btn_cancel} type="button">Отмена</button>
             <button disabled={submitting} className={styles.btn_submit} type="submit">Отправить</button>
           </div>

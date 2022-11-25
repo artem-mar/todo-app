@@ -60,7 +60,6 @@ const Task = ({ task, openForm }) => {
 
   useEffect(() => {
     const watchTime = () => {
-      console.log('sss');
       if (isExpired(task.deadline) && task.status === 'IN_WORK') {
         changeStatus('EXPIRED');
       }
@@ -96,7 +95,7 @@ const Task = ({ task, openForm }) => {
   const Icon = statusIcons[task.status];
 
   return (
-    <div className={styles.flex_row_start}>
+    <div className={styles.flex_row_stretch}>
       <div className={styles.flex_col}>
         <button
           disabled={submitting}
