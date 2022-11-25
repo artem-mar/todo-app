@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useContext, useEffect, useRef, useState,
 } from 'react';
 import {
@@ -37,7 +38,7 @@ const Task = ({ task, openForm }) => {
     }
   }, [task.fileName]);
 
-  const changeStatus = async (newStatus) => {
+  const changeStatus = useCallback(async (newStatus) => {
     const url = paths.dataBase();
     try {
       setSubmitting(true);
@@ -53,24 +54,25 @@ const Task = ({ task, openForm }) => {
       console.log(err.message);
     }
     setSubmitting(false);
-  };
+  }, [task, tasks, setTasks]);
 
   const isExpired = (d) => dayjs().isAfter(dayjs(d));
 
   useEffect(() => {
     const watchTime = () => {
+      console.log('sss');
       if (isExpired(task.deadline) && task.status === 'IN_WORK') {
         changeStatus('EXPIRED');
       }
 
       if (task.status === 'IN_WORK' && !isExpired(task.deadline)) {
-        timerRef.current = setTimeout(watchTime, 30000);
+        timerRef.current = setTimeout(watchTime, 5000);
       }
     };
     watchTime();
 
     return () => clearTimeout(timerRef.current);
-  }, [task]);
+  }, [task, changeStatus]);
 
   const toggleStatus = () => {
     const newStatus = task.status === 'IN_WORK' ? 'COMPLETED' : 'IN_WORK';
@@ -85,7 +87,7 @@ const Task = ({ task, openForm }) => {
       storageApi.deleteFile(task.fileName);
       setTasks(filtered);
     } catch (err) {
-      console.log(err.message);
+      console.log(err);
     }
   };
 
