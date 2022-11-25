@@ -10,6 +10,7 @@ import 'dayjs/locale/ru';
 import axios from 'axios';
 import TaskContext from '../../TaskContext';
 import paths from '../../path.js';
+import storageApi from '../../storageApi';
 
 import styles from './Task.module.css';
 
@@ -27,6 +28,14 @@ const Task = ({ task, openForm }) => {
 
   const { tasks, setTasks } = useContext(TaskContext);
   const [submitting, setSubmitting] = useState(false);
+  const [fileUrl, setFileUrl] = useState(null);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (task.fileName) {
+      storageApi.getFileUrl(task.fileName).then((url) => setFileUrl(url));
+    }
+  }, [task.fileName]);
 
   const changeStatus = async (newStatus) => {
     const url = paths.dataBase();
@@ -47,8 +56,6 @@ const Task = ({ task, openForm }) => {
   };
 
   const isExpired = (d) => dayjs().isAfter(dayjs(d));
-
-  const timerRef = useRef(null);
 
   useEffect(() => {
     const watchTime = () => {
@@ -75,6 +82,7 @@ const Task = ({ task, openForm }) => {
     try {
       await axios.delete(url);
       const filtered = tasks.filter((t) => t.id !== task.id);
+      storageApi.deleteFile(task.fileName);
       setTasks(filtered);
     } catch (err) {
       console.log(err.message);
@@ -101,7 +109,7 @@ const Task = ({ task, openForm }) => {
           {task.name}
         </h2>
         <p className={styles.description}>{task.description}</p>
-        {task.file && <span className={styles.file}>{task.file}</span>}
+        {fileUrl && <a target="blank" href={fileUrl} className={styles.file}>{task.fileName}</a>}
       </div>
 
       <div className={styles.task_control}>

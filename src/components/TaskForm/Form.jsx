@@ -7,6 +7,7 @@ import { FileEarmarkPlusFill, FileEarmarkPlus } from 'react-bootstrap-icons';
 import axios from 'axios';
 import TaskContext from '../../TaskContext';
 import paths from '../../path.js';
+import storageApi from '../../storageApi';
 
 import styles from './Form.module.css';
 
@@ -14,37 +15,50 @@ const Form = ({
   initialValue = {
     name: '',
     description: '',
-    filePath: '',
+    fileName: '',
     deadline: '',
     status: 'IN_WORK', // COMPLETED EXPIRED
   }, closeForm,
 }) => {
-  const nameField = useRef(null);
   const form = useRef(null);
+  const nameField = useRef(null);
 
   useEffect(() => {
     nameField.current.select();
   }, []);
 
   const [formData, updateFormData] = useImmer(initialValue);
-  const [error, setError] = useState(null);
+  const [errorFeedback, setErrorFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [file, setFile] = useState(null);
 
   const { tasks, setTasks } = useContext(TaskContext);
-  const fileInput = useRef(null); // //////////////////////////////
 
-  const onChange = ({ target: { name, value } }) => {
-    updateFormData((draft) => {
-      draft[name] = value;
-    });
+  const onChange = ({ target: { name, value, files } }) => {
+    if (files && files.length) {
+      updateFormData((draft) => {
+        draft[name] = files[0].name;
+      });
+
+      setFile(files[0]);
+    } else {
+      updateFormData((draft) => {
+        draft[name] = value;
+      });
+    }
   };
 
-  const submitData = async (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     const url = paths.dataBase();
 
     try {
       setSubmitting(true);
+
+      if (file) {
+        await storageApi.uploadFile(file);
+      }
+
       if (Object.hasOwn(formData, 'id')) {
         const { id, ...taskWithoutId } = formData;
         await axios.patch(url, { [id]: taskWithoutId });
@@ -60,7 +74,7 @@ const Form = ({
       closeForm();
     } catch (e) {
       const feedback = e.name === 'AxiosError' ? 'Ошибка сети' : 'Неизвестная ошибка';
-      setError(feedback);
+      setErrorFeedback(feedback);
       setSubmitting(false);
       console.log(e);
     }
@@ -68,7 +82,7 @@ const Form = ({
 
   return (
     <>
-      <form ref={form} onSubmit={submitData} id="task">
+      <form ref={form} onSubmit={submit} id="task">
         <div className={styles.flex_row}>
           <label className={styles.flex_item_grow1} htmlFor="name">
             <h3>Название</h3>
@@ -100,15 +114,13 @@ const Form = ({
           </label>
 
           <label className={styles.file_label} htmlFor="file">
-            {formData.file ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
+            {file ? <FileEarmarkPlusFill size="2rem" /> : <FileEarmarkPlus size="2rem" />}
             <input
-              ref={fileInput}
               onChange={onChange}
-              value={formData.filePath}
               className={styles.file_input}
               type="file"
               id="file"
-              name="file"
+              name="fileName"
             />
           </label>
         </div>
@@ -130,7 +142,7 @@ const Form = ({
           </div>
         </div>
       </form>
-      {error && <span className={styles.feedback}>{error}</span>}
+      {errorFeedback && <span className={styles.feedback}>{errorFeedback}</span>}
     </>
   );
 };
