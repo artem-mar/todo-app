@@ -6,6 +6,7 @@ import { PlusLg } from 'react-bootstrap-icons';
 import FormBlock from './components/TaskForm/FormBlock.jsx';
 import TaskContext from './TaskContext.js';
 import TaskList from './components/TaskList.jsx';
+import { getDataBaseUrl } from './dbApi.js';
 
 import styles from './App.module.css';
 
@@ -15,7 +16,7 @@ const App = () => {
 
   useEffect(() => {
     const uploadTasks = async () => {
-      const url = 'https://todo-list-7aa15-default-rtdb.europe-west1.firebasedatabase.app/todos.json';
+      const url = getDataBaseUrl();
 
       try {
         const { data } = await axios.get(url);
@@ -24,8 +25,7 @@ const App = () => {
           setTasks(taskList);
         }
       } catch (e) {
-        const feedback = e.name === 'AxiosError' ? 'Ошибка сети' : 'Неизвестная ошибка';
-        console.log(feedback);
+        console.log(e);
       }
     };
     uploadTasks();

@@ -6,20 +6,19 @@ import { useImmer } from 'use-immer';
 import { FileEarmarkPlusFill, FileEarmarkPlus } from 'react-bootstrap-icons';
 import axios from 'axios';
 import TaskContext from '../../TaskContext';
-import paths from '../../path.js';
-import storageApi from '../../storageApi';
+import storageApi, { getDataBaseUrl } from '../../dbApi';
 
 import styles from './Form.module.css';
 
-const Form = ({
-  initialValue = {
-    name: '',
-    description: '',
-    fileName: '',
-    deadline: '',
-    status: 'IN_WORK', // COMPLETED EXPIRED
-  }, closeForm,
-}) => {
+const initialValue = {
+  name: '',
+  description: '',
+  fileName: '',
+  deadline: '',
+  status: 'IN_WORK', // COMPLETED EXPIRED
+};
+
+const Form = ({ taskInfo = initialValue, closeForm }) => {
   const form = useRef(null);
   const nameField = useRef(null);
 
@@ -27,8 +26,8 @@ const Form = ({
     nameField.current.select();
   }, []);
 
-  const [formData, updateFormData] = useImmer(initialValue);
-  const [errorFeedback, setErrorFeedback] = useState(null);
+  const [formData, updateFormData] = useImmer(taskInfo);
+  const [errorFeedback, setErrorFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [file, setFile] = useState(null);
 
@@ -50,25 +49,29 @@ const Form = ({
 
   const submit = async (event) => {
     event.preventDefault();
-    const url = paths.dataBase();
+    const url = getDataBaseUrl();
 
     try {
       setSubmitting(true);
-
-      if (file) {
-        await storageApi.uploadFile(file);
-      }
 
       if (Object.hasOwn(formData, 'id')) {
         const { id, ...taskWithoutId } = formData;
         await axios.patch(url, { [id]: taskWithoutId });
         const filtered = tasks.map((t) => (t.id === id ? formData : t));
+        if (file) {
+          await storageApi.uploadFile(file, id);
+        }
+
         setTasks(filtered);
       } else {
         const { data } = await axios.post(url, formData);
         const id = data.name;
         const taskWithId = { ...formData, id };
-        setTasks([...tasks, taskWithId]);
+        if (file) {
+          await storageApi.uploadFile(file, id);
+        }
+
+        setTasks([taskWithId, ...tasks]);
       }
 
       closeForm();
@@ -121,6 +124,7 @@ const Form = ({
               type="file"
               id="file"
               name="fileName"
+              accept=".svg, .jpg, .jpeg, .png, .gif"
             />
           </label>
         </div>

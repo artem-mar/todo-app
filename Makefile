@@ -1,8 +1,8 @@
-setup
+setup:
 	npm install
 
-build
+build:
 	npm run build
 
-make start
+start:
 	npm run start

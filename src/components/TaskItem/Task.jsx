@@ -10,8 +10,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/ru';
 import axios from 'axios';
 import TaskContext from '../../TaskContext';
-import paths from '../../path.js';
-import storageApi from '../../storageApi';
+import storageApi, { getDataBaseUrl } from '../../dbApi';
 
 import styles from './Task.module.css';
 
@@ -29,17 +28,17 @@ const Task = ({ task, openForm }) => {
 
   const { tasks, setTasks } = useContext(TaskContext);
   const [submitting, setSubmitting] = useState(false);
-  const [fileUrl, setFileUrl] = useState(null);
+  const [fileUrl, setFileUrl] = useState('');
   const timerRef = useRef(null);
 
   useEffect(() => {
     if (task.fileName) {
-      storageApi.getFileUrl(task.fileName).then((url) => setFileUrl(url));
+      storageApi.getFileUrl(task.id).then((url) => setFileUrl(url));
     }
-  }, [task.fileName]);
+  }, [task.fileName, task.id]);
 
   const changeStatus = useCallback(async (newStatus) => {
-    const url = paths.dataBase();
+    const url = getDataBaseUrl();
     try {
       setSubmitting(true);
       const { id, ...taskWithoutId } = task;
@@ -79,13 +78,13 @@ const Task = ({ task, openForm }) => {
   };
 
   const deleteTask = async () => {
-    const url = paths.dataBase(task.id);
+    const url = getDataBaseUrl(task.id);
     try {
       await axios.delete(url);
       const filtered = tasks.filter((t) => t.id !== task.id);
       setTasks(filtered);
       if (task.fileName) {
-        storageApi.deleteFile(task.fileName);
+        storageApi.deleteFile(task.id);
       }
     } catch (err) {
       console.log(err);

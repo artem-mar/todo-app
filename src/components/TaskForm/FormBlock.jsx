@@ -1,9 +1,7 @@
-import React, {
-  useContext,
-} from 'react';
-
+import React, { useContext } from 'react';
 import TaskContext from '../../TaskContext.js';
 import Form from './Form.jsx';
+
 import styles from './Form.module.css';
 
 const FormBlock = () => {

@@ -2,8 +2,7 @@ import React from 'react';
 import TaskBlock from './TaskItem/TaskBlock.jsx';
 
 const TaskList = ({ tasks }) => (
-  [...tasks]
-    .reverse()
+  tasks
     .map((t) => (
       <TaskBlock key={t.id} task={t} />
     ))
