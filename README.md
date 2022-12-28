@@ -1,3 +1,5 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/0d4fa7c2c0fee4594f09/maintainability)](https://codeclimate.com/github/artem-mar/todo-app/maintainability)
+
 # Todo list. Тестовое задание на вакансию Front-end-разработчик (junior)
 
 ## Задание:
