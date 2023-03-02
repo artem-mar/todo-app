@@ -3,7 +3,7 @@ import React, {
   useContext, useEffect, useRef, useState,
 } from 'react';
 import {
-  PencilSquare, CheckCircleFill, XCircleFill, Trash3, Circle,
+  PencilSquare, CheckCircleFill, XCircleFill, Trash3, Circle, CardImage,
 } from 'react-bootstrap-icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -107,11 +107,14 @@ const Task = ({ task, openForm }) => {
       </div>
 
       <div className={styles.task_info}>
-        <h2>
-          {task.name}
-        </h2>
+        <h2>{task.name}</h2>
         <p className={styles.description}>{task.description}</p>
-        {fileUrl && <a target="blank" href={fileUrl} className={styles.file}>{task.fileName}</a>}
+        {fileUrl && (
+          <a target="blank" href={fileUrl} className={styles.file}>
+            <CardImage size="1rem" />
+            {task.fileName}
+          </a>
+        )}
       </div>
 
       <div className={styles.task_control}>
