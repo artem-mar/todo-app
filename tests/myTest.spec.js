@@ -23,7 +23,7 @@ test('add a new task', async ({ page }) => {
   await page.getByRole('button').first().click();
 
   await page.getByPlaceholder('Название задачи').fill('test task');
-  await page.getByPlaceholder('Введите описание').fill('description');
+  await page.getByPlaceholder('Введите описание').fill('описание');
   await page.getByRole('textbox', { name: 'Дедлайн' }).fill('2023-04-10T10:20');
 
   await page.getByRole('button', { name: 'Отправить' }).click();
@@ -42,11 +42,11 @@ test('edit task', async ({ page }) => {
   await expect(page.locator('_react=Form')).toBeVisible();
 });
 
-// test('delete task', async ({ page }) => {
-//   await page.goto('/');
+test('delete task', async ({ page }) => {
+  await page.goto('/');
 
-//   await page.getByTestId('delete test task').click();
+  await page.getByTestId('delete test task').click();
 
-//   // тут по идее тесты должны падать
-//   await expect(page.getByText('10 апреля')).toBeVisible();
-// });
+  // тут по идее тесты должны падать
+  await expect(page.getByText('10 апреля')).toBeVisible();
+});
