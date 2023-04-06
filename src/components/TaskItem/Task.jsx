@@ -120,12 +120,17 @@ const Task = ({ task, openForm }) => {
       <div className={styles.task_control}>
         <span>{date}</span>
         <div className={styles.btn_group}>
-          <button className={styles.btn} type="button" onClick={openForm}>
+          <button data-testid="edit task" className={styles.btn} type="button" onClick={openForm}>
             <PencilSquare size="1.5rem" />
           </button>
 
-          <button className={styles.btn} type="button">
-            <Trash3 onClick={deleteTask} size="1.5rem" />
+          <button
+            data-testid={`delete ${task.name}`}
+            className={styles.btn}
+            onClick={deleteTask}
+            type="button"
+          >
+            <Trash3 size="1.5rem" />
           </button>
         </div>
       </div>

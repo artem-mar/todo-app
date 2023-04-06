@@ -4,7 +4,7 @@ import TaskBlock from './TaskItem/TaskBlock.jsx';
 const TaskList = ({ tasks }) => (
   tasks
     .map((t) => (
-      <TaskBlock key={t.id} task={t} />
+      <TaskBlock data-testId="task" key={t.id} task={t} />
     ))
 );
 
